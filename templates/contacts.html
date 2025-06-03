@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Mail App - Contacts</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+<nav class="navbar">
+    <div class="nav-container">
+        <h1 class="nav-title">📧 Mail App</h1>
+        <div class="nav-links">
+            <a href="/" class="nav-link">Send Email</a>
+            <a href="/contacts" class="nav-link active">Contacts</a>
+            <a href="/history" class="nav-link">History</a>
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+    <h2>👥 Contact Management</h2>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="flash {{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <!-- Add New Contact Form -->
+    <div class="contact-form-section">
+        <h3>➕ Add New Contact</h3>
+        <form method="POST" action="/save_contact" class="contact-form">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="name">👤 Name:</label>
+                    <input type="text" id="name" name="name" required placeholder="Enter contact name">
+                </div>
+                <div class="form-group">
+                    <label for="email">📧 Email:</label>
+                    <input type="email" id="email" name="email" required placeholder="Enter email address">
+                </div>
+                <div class="form-group">
+                    <button type="submit" class="btn-primary">💾 Save Contact</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Contacts List -->
+    <div class="contacts-section">
+        <h3>📋 Your Contacts ({{ contacts|length }})</h3>
+        
+        {% if contacts %}
+            <div class="contacts-grid">
+                {% for contact in contacts %}
+                    <div class="contact-card">
+                        <div class="contact-info">
+                            <div class="contact-name">{{ contact.name }}</div>
+                            <div class="contact-email">{{ contact.email }}</div>
+                        </div>
+                        <div class="contact-actions">
+                            <button class="btn-secondary btn-small" onclick="copyToClipboard('{{ contact.email }}')">📋 Copy</button>
+                            <a href="/delete_contact/{{ loop.index0 }}" class="btn-danger btn-small" onclick="return confirm('Delete {{ contact.name }}?')">🗑️ Delete</a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+            
+            <div class="bulk-actions">
+                <button class="btn-secondary" onclick="exportContacts()">📤 Export Contacts</button>
+                <button class="btn-secondary" onclick="selectAllContacts()">✅ Select All</button>
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <p>📭 No contacts yet. Add your first contact above!</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+function copyToClipboard(email) {
+    navigator.clipboard.writeText(email).then(function() {
+        // Create a temporary notification
+        const notification = document.createElement('div');
+        notification.className = 'notification success';
+        notification.textContent = `📋 Copied ${email} to clipboard!`;
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.remove();
+        }, 3000);
+    }).catch(function(err) {
+        alert('Failed to copy email: ' + err);
+    });
+}
+
+function exportContacts() {
+    const contacts = {{ contacts|tojson }};
+    const csvContent = "data:text/csv;charset=utf-8," 
+        + "Name,Email\n"
+        + contacts.map(contact => `"${contact.name}","${contact.email}"`).join("\n");
+    
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "contacts.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+function selectAllContacts() {
+    const emails = {{ contacts|map(attribute='email')|list|tojson }};
+    const names = {{ contacts|map(attribute='name')|list|tojson }};
+    
+    // Store in localStorage to be picked up by the main form
+    localStorage.setItem('selectedEmails', emails.join(', '));
+    localStorage.setItem('selectedNames', names.join(', '));
+    
+    alert('All contacts selected! Go back to Send Email page to use them.');
+}
+
+// Auto-fill functionality for when opened from main page
+window.addEventListener('message', function(event) {
+    if (event.data.action === 'selectContact') {
+        const contact = event.data.contact;
+        window.opener.postMessage({
+            action: 'contactSelected',
+            email: contact.email,
+            name: contact.name
+        }, '*');
+        window.close();
+    }
+});
+</script>
+</body>
+</html>

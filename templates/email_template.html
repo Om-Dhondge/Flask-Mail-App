@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head><title>Email</title></head>
+<body style="font-family: Arial, sans-serif; line-height: 1.6;">
+    <h2>Hello {{ name }}!</h2>
+
+    <p>{{ body | safe }}</p>
+
+    <hr>
+    <footer style="font-size: 0.9em; color: #555;">
+        <p>---<br>
+        This is an automated message from <strong>XYZ Company</strong>.<br>
+        Please do not reply directly to this email.<br>
+        For support, contact us at <a href="mailto:support@example.com">support@example.com</a>.
+        </p>
+    </footer>
+</body>
+</html>

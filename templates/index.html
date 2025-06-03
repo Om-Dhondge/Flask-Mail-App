@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Mail App - Send Email</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+<nav class="navbar">
+    <div class="nav-container">
+        <h1 class="nav-title">📧 Mail App</h1>
+        <div class="nav-links">
+            <a href="/" class="nav-link active">Send Email</a>
+            <a href="/contacts" class="nav-link">Contacts</a>
+            <a href="/history" class="nav-link">History</a>
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+    <h2>✉️ Send an Email</h2>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="flash {{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <form method="POST" enctype="multipart/form-data" id="emailForm">
+        <div class="form-row">
+            <div class="form-group">
+                <label for="to">📧 To (comma-separated emails):</label>
+                <input type="text" id="to" name="to" required placeholder="john@example.com, jane@example.com">
+                <button type="button" class="btn-secondary" onclick="loadFromContacts('to')">Load from Contacts</button>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="names">👤 Names (comma-separated, must match emails):</label>
+                <input type="text" id="names" name="names" required placeholder="John Doe, Jane Smith">
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="cc">📋 CC (optional):</label>
+                <input type="text" id="cc" name="cc" placeholder="manager@example.com">
+                <button type="button" class="btn-secondary" onclick="loadFromContacts('cc')">Load from Contacts</button>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="template">🎨 Email Template:</label>
+                <select id="template" name="template" onchange="updatePreview()">
+                    <option value="default">Default</option>
+                    <option value="professional">Professional</option>
+                    <option value="casual">Casual</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="subject">📝 Subject:</label>
+                <input type="text" id="subject" name="subject" required placeholder="Enter email subject">
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="body">✍️ Body:</label>
+                <textarea id="body" name="body" rows="8" required placeholder="Enter your message here..." oninput="updatePreview()"></textarea>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="attachments">📎 Attachments:</label>
+                <input type="file" id="attachments" name="attachments" multiple accept=".txt,.pdf,.png,.jpg,.jpeg,.gif,.doc,.docx,.xls,.xlsx,.ppt,.pptx">
+                <small class="file-info">Allowed: txt, pdf, images, office documents (max 16MB each)</small>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button type="button" class="btn-secondary" onclick="showPreview()">👁️ Preview</button>
+            <button type="submit" class="btn-primary">🚀 Send Email</button>
+        </div>
+    </form>
+
+    <!-- Preview Modal -->
+    <div id="previewModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>📧 Email Preview</h3>
+                <span class="close" onclick="closePreview()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div id="previewContent"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function showPreview() {
+    const body = document.getElementById('body').value;
+    const template = document.getElementById('template').value;
+
+    if (!body.trim()) {
+        alert('Please enter email body to preview');
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('body', body);
+    formData.append('template', template);
+    formData.append('preview_name', 'Preview User');
+
+    fetch('/preview', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            document.getElementById('previewContent').innerHTML = data.html;
+            document.getElementById('previewModal').style.display = 'block';
+        } else {
+            alert('Error generating preview: ' + data.error);
+        }
+    })
+    .catch(error => {
+        alert('Error: ' + error);
+    });
+}
+
+function closePreview() {
+    document.getElementById('previewModal').style.display = 'none';
+}
+
+function updatePreview() {
+    // Auto-update preview functionality can be added here
+}
+
+function loadFromContacts(fieldId) {
+    // This would open a contact picker - simplified for now
+    window.open('/contacts', '_blank');
+}
+
+// Close modal when clicking outside
+window.onclick = function(event) {
+    const modal = document.getElementById('previewModal');
+    if (event.target == modal) {
+        modal.style.display = 'none';
+    }
+}
+
+// Auto-save draft functionality
+let draftTimer;
+function saveDraft() {
+    const formData = {
+        to: document.getElementById('to').value,
+        names: document.getElementById('names').value,
+        cc: document.getElementById('cc').value,
+        subject: document.getElementById('subject').value,
+        body: document.getElementById('body').value,
+        template: document.getElementById('template').value
+    };
+    localStorage.setItem('emailDraft', JSON.stringify(formData));
+}
+
+function loadDraft() {
+    const draft = localStorage.getItem('emailDraft');
+    if (draft) {
+        const formData = JSON.parse(draft);
+        document.getElementById('to').value = formData.to || '';
+        document.getElementById('names').value = formData.names || '';
+        document.getElementById('cc').value = formData.cc || '';
+        document.getElementById('subject').value = formData.subject || '';
+        document.getElementById('body').value = formData.body || '';
+        document.getElementById('template').value = formData.template || 'default';
+    }
+}
+
+// Auto-save every 30 seconds
+document.addEventListener('DOMContentLoaded', function() {
+    loadDraft();
+
+    const inputs = ['to', 'names', 'cc', 'subject', 'body', 'template'];
+    inputs.forEach(id => {
+        document.getElementById(id).addEventListener('input', function() {
+            clearTimeout(draftTimer);
+            draftTimer = setTimeout(saveDraft, 2000); // Save 2 seconds after user stops typing
+        });
+    });
+});
+
+// Clear draft after successful submission
+document.getElementById('emailForm').addEventListener('submit', function() {
+    localStorage.removeItem('emailDraft');
+});
+</script>
+</body>
+</html>

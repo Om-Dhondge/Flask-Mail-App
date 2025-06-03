@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Casual Email</title>
+    <style>
+        body {
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            line-height: 1.6;
+            color: #444;
+            max-width: 600px;
+            margin: 0 auto;
+            background: linear-gradient(45deg, #ff9a9e 0%, #fecfef 50%, #fecfef 100%);
+            padding: 20px;
+        }
+        .email-container {
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            overflow: hidden;
+            border: 3px solid #ff6b6b;
+        }
+        .header {
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            color: white;
+            padding: 25px;
+            text-align: center;
+            position: relative;
+        }
+        .header::after {
+            content: "✨";
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            font-size: 20px;
+        }
+        .content {
+            padding: 25px;
+            background: linear-gradient(to bottom, #fff, #f8f9ff);
+        }
+        .greeting {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #ff6b6b;
+        }
+        .greeting::before {
+            content: "👋 ";
+        }
+        .body-content {
+            font-size: 16px;
+            line-height: 1.7;
+            margin-bottom: 25px;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #4ecdc4;
+        }
+        .footer {
+            background: linear-gradient(45deg, #ffeaa7, #fab1a0);
+            padding: 20px 25px;
+            text-align: center;
+            font-size: 14px;
+            color: #2d3436;
+        }
+        .company-name {
+            font-weight: bold;
+            color: #e17055;
+        }
+        .contact-info {
+            margin-top: 10px;
+        }
+        .contact-info a {
+            color: #0984e3;
+            text-decoration: none;
+        }
+        .emoji {
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="header">
+            <h1 style="margin: 0; font-size: 22px;">Hey There! 🎉</h1>
+        </div>
+        
+        <div class="content">
+            <div class="greeting">Hi {{ name }}!</div>
+            
+            <div class="body-content">
+                {{ body | safe }}
+            </div>
+            
+            <p style="margin-bottom: 0;">
+                Cheers! 🎈<br>
+                <span class="company-name">The Awesome XYZ Team</span> 🚀
+            </p>
+        </div>
+        
+        <div class="footer">
+            <div class="company-name">🏢 XYZ Company</div>
+            <div class="contact-info">
+                <span class="emoji">📧</span> <a href="mailto:support@example.com">support@example.com</a><br>
+                <span class="emoji">🌐</span> <a href="https://example.com">www.example.com</a><br>
+                <span class="emoji">📞</span> +1 (555) 123-4567
+            </div>
+            <hr style="margin: 15px 0; border: none; border-top: 2px dashed #fab1a0;">
+            <p style="margin: 0; font-size: 12px;">
+                🤖 This is an automated message, but we're real people who care!<br>
+                Got questions? Just hit us up! 💬
+            </p>
+        </div>
+    </div>
+</body>
+</html>

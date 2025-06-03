@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Professional Email</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #f8f9fa;
+            padding: 20px;
+        }
+        .email-container {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .content {
+            padding: 30px;
+        }
+        .greeting {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+        .body-content {
+            font-size: 16px;
+            line-height: 1.8;
+            margin-bottom: 30px;
+        }
+        .footer {
+            background-color: #f8f9fa;
+            padding: 20px 30px;
+            border-top: 1px solid #e9ecef;
+            font-size: 14px;
+            color: #6c757d;
+        }
+        .company-name {
+            font-weight: bold;
+            color: #495057;
+        }
+        .contact-info {
+            margin-top: 10px;
+        }
+        .contact-info a {
+            color: #667eea;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="header">
+            <h1 style="margin: 0; font-size: 24px;">Professional Communication</h1>
+        </div>
+        
+        <div class="content">
+            <div class="greeting">Dear {{ name }},</div>
+            
+            <div class="body-content">
+                {{ body | safe }}
+            </div>
+            
+            <p style="margin-bottom: 0;">Best regards,<br>
+            <span class="company-name">XYZ Company Team</span></p>
+        </div>
+        
+        <div class="footer">
+            <div class="company-name">XYZ Company</div>
+            <div class="contact-info">
+                📧 Email: <a href="mailto:support@example.com">support@example.com</a><br>
+                🌐 Website: <a href="https://example.com">www.example.com</a><br>
+                📞 Phone: +1 (555) 123-4567
+            </div>
+            <hr style="margin: 15px 0; border: none; border-top: 1px solid #dee2e6;">
+            <p style="margin: 0; font-size: 12px;">
+                This is an automated message. Please do not reply directly to this email.
+                If you have any questions, please contact our support team.
+            </p>
+        </div>
+    </div>
+</body>
+</html>

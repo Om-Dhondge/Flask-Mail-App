@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Mail App - Email History</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+<nav class="navbar">
+    <div class="nav-container">
+        <h1 class="nav-title">📧 Mail App</h1>
+        <div class="nav-links">
+            <a href="/" class="nav-link">Send Email</a>
+            <a href="/contacts" class="nav-link">Contacts</a>
+            <a href="/history" class="nav-link active">History</a>
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+    <h2>📊 Email History</h2>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="flash {{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    {% if history %}
+        <div class="history-stats">
+            <div class="stat-card">
+                <div class="stat-number">{{ history|length }}</div>
+                <div class="stat-label">Total Emails</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">{{ history|selectattr('status', 'match', '^Sent:')|list|length }}</div>
+                <div class="stat-label">Successful</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">{{ history|selectattr('status', 'match', '^Failed:')|list|length }}</div>
+                <div class="stat-label">Failed</div>
+            </div>
+        </div>
+
+        <div class="history-list">
+            {% for entry in history %}
+                <div class="history-item">
+                    <div class="history-header">
+                        <div class="history-subject">
+                            <strong>{{ entry.subject or 'No Subject' }}</strong>
+                        </div>
+                        <div class="history-timestamp">
+                            📅 {{ entry.timestamp[:19].replace('T', ' ') }}
+                        </div>
+                    </div>
+                    
+                    <div class="history-details">
+                        <div class="history-recipients">
+                            <strong>📧 Recipients:</strong>
+                            <div class="recipient-list">
+                                {% for recipient in entry.recipients %}
+                                    <span class="recipient-tag">{{ recipient }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        
+                        <div class="history-status">
+                            <strong>📊 Status:</strong>
+                            <span class="status-badge {% if 'Sent:' in entry.status %}success{% else %}danger{% endif %}">
+                                {{ entry.status }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="history-actions">
+            <button class="btn-secondary" onclick="exportHistory()">📤 Export History</button>
+            <button class="btn-secondary" onclick="clearHistory()" style="background-color: #dc3545;">🗑️ Clear History</button>
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">📭</div>
+            <h3>No Email History</h3>
+            <p>You haven't sent any emails yet. <a href="/">Send your first email</a> to see it here!</p>
+        </div>
+    {% endif %}
+</div>
+
+<script>
+function exportHistory() {
+    const history = {{ history|tojson }};
+    
+    let csvContent = "data:text/csv;charset=utf-8,";
+    csvContent += "Timestamp,Subject,Recipients,Status\n";
+    
+    history.forEach(entry => {
+        const timestamp = entry.timestamp.replace('T', ' ').substring(0, 19);
+        const subject = `"${(entry.subject || 'No Subject').replace(/"/g, '""')}"`;
+        const recipients = `"${entry.recipients.join('; ')}"`;
+        const status = `"${entry.status.replace(/"/g, '""')}"`;
+        
+        csvContent += `${timestamp},${subject},${recipients},${status}\n`;
+    });
+    
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "email_history.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+function clearHistory() {
+    if (confirm('Are you sure you want to clear all email history? This action cannot be undone.')) {
+        fetch('/clear_history', {
+            method: 'POST',
+        })
+        .then(response => {
+            if (response.ok) {
+                location.reload();
+            } else {
+                alert('Failed to clear history');
+            }
+        })
+        .catch(error => {
+            alert('Error: ' + error);
+        });
+    }
+}
+
+// Auto-refresh every 30 seconds to show new entries
+setInterval(() => {
+    if (document.visibilityState === 'visible') {
+        location.reload();
+    }
+}, 30000);
+</script>
+</body>
+</html>
