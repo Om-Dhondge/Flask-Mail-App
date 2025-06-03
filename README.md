@@ -1,4 +1,4 @@
-# 📧 Enhanced Mail App
+# 📧 Flask Mail App
 
 A modern, feature-rich email sending application built with Flask. Send personalized emails to multiple recipients with beautiful templates, contact management, and comprehensive tracking.
 
@@ -43,9 +43,10 @@ A modern, feature-rich email sending application built with Flask. Send personal
 
 ### Installation
 
-1. **Clone or download the project**
+1. **Clone the repository**
    ```bash
-   cd "Desktop/Mail App"
+   git clone https://github.com/Om-Dhondge/Flask-Mail-App.git
+   cd Flask-Mail-App
    ```
 
 2. **Install dependencies**
@@ -125,7 +126,7 @@ Fun, colorful template for informal communications
 
 ## 📁 File Structure
 ```
-Mail App/
+Flask-Mail-App/
 ├── app.py                 # Main Flask application
 ├── requirements.txt       # Python dependencies
 ├── .env.example          # Environment configuration template
